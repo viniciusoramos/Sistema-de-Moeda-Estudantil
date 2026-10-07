@@ -8,9 +8,11 @@
 '     (uma tabela por classe, PK da filha = FK para usuario)
 '   - herança Transacao -> EnvioMoedas/ResgateVantagem/CreditoSemestral: JOINED
 '   - Endereco é @Embeddable: suas colunas ficam na própria tabela aluno
+'
+' v2.1 - nova tabela transferencia_moedas (transferência entre alunos)
 ' =====================================================================
 
-title Sistema de Moeda Estudantil — Modelo Entidade-Relacionamento (v2 · Lab03S02)
+title Sistema de Moeda Estudantil — Modelo Entidade-Relacionamento (v2.1 · Lab03S02)
 
 skinparam shadowing false
 skinparam linetype ortho
@@ -111,6 +113,23 @@ entity "credito_semestral" as credito {
   * semestre : VARCHAR(6)
   .. UK (professor_id, semestre) ..
 }
+
+entity "transferencia_moedas" as transferencia {
+  * transacao_id : BIGINT <<PK, FK>>
+  --
+  * remetente_id : BIGINT <<FK>>
+  * destinatario_id : BIGINT <<FK>>
+  * motivo : VARCHAR(500)
+  * status : VARCHAR(10)
+  avaliador_id : BIGINT <<FK>>
+  data_decisao : TIMESTAMP
+  justificativa : VARCHAR(500)
+}
+
+transacao ||--o| transferencia
+aluno ||--o{ transferencia : "envia"
+aluno ||--o{ transferencia : "recebe"
+professor |o--o{ transferencia : "avalia"
 
 usuario ||--o| aluno
 usuario ||--o| professor

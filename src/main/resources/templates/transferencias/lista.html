@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Transferências')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <div class="cabecalho-pagina">
+        <div>
+            <h1>Transferências entre alunos</h1>
+            <p class="subtitulo">Cada transferência só é concluída depois de aprovada por um professor.</p>
+        </div>
+        <a class="botao" th:href="@{/transferencias/nova}">Nova transferência</a>
+    </div>
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h2>Aguardando aprovação</h2>
+    <div class="tabela-rolagem">
+        <table>
+            <thead><tr><th>Solicitada em</th><th>De</th><th>Para</th><th>Instituição</th><th>Valor</th><th></th></tr></thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(pendentes)}"><td colspan="6" class="vazio">Nenhuma transferência pendente.</td></tr>
+            <tr th:each="t : ${pendentes}">
+                <td th:text="${#temporals.format(t.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${t.remetente.nome}"></td>
+                <td th:text="${t.destinatario.nome}"></td>
+                <td th:text="${t.remetente.instituicao.sigla}"></td>
+                <td class="saldo" th:text="${t.valor}"></td>
+                <td><a th:href="@{/transferencias/{id}(id=${t.id})}">Avaliar</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Histórico</h2>
+    <div class="tabela-rolagem">
+        <table>
+            <thead><tr><th>Solicitada em</th><th>De</th><th>Para</th><th>Valor</th><th>Situação</th><th></th></tr></thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(transferencias)}"><td colspan="6" class="vazio">Nenhuma transferência registrada.</td></tr>
+            <tr th:each="t : ${transferencias}">
+                <td th:text="${#temporals.format(t.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${t.remetente.nome}"></td>
+                <td th:text="${t.destinatario.nome}"></td>
+                <td class="saldo" th:text="${t.valor}"></td>
+                <td><span class="selo" th:classappend="${#strings.toLowerCase(t.status.name())}" th:text="${t.status.rotulo}"></span></td>
+                <td><a th:href="@{/transferencias/{id}(id=${t.id})}">Detalhes</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{transferencias/criterios :: criterios(${regras})}"></div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

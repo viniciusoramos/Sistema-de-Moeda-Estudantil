@@ -10,9 +10,12 @@
 '     (padrão Repository/DAO), um por agregado
 '   - componentes implementados nesta sprint destacados; os demais ficam
 '     para a Lab03S03
+'
+' v2.1 - novo requisito: TransferenciaController, TransferenciaService,
+'   TransferenciaMoedasRepository, RegrasTransferencia e TarefasAgendadas
 ' =====================================================================
 
-title Sistema de Moeda Estudantil — Diagrama de Componentes (v2 · Lab03S02)
+title Sistema de Moeda Estudantil — Diagrama de Componentes (v2.1 · Lab03S02)
 
 skinparam shadowing false
 skinparam componentStyle uml2
@@ -37,12 +40,14 @@ node "Aplicação Spring Boot (Java 17)" {
     [alunos/*.html] as VAluno
     [empresas/*.html] as VEmpresa
     [index.html] as VIndex
+    [transferencias/*.html] as VTransf
   }
 
   package "Controller — Spring Web MVC\n(controller/)" {
     [HomeController] as CHome
     [AlunoController] as CAluno
     [EmpresaParceiraController] as CEmpresa
+    [TransferenciaController] as CTransf
     [AutenticacaoController] <<Lab03S03>> as CAuth
     [VantagemController] <<Lab03S03>> as CVant
     [MoedaController] <<Lab03S03>> as CMoeda
@@ -54,6 +59,7 @@ node "Aplicação Spring Boot (Java 17)" {
       [EmpresaParceiraService] as SEmpresa
       [ProfessorService] as SProf
       [InstituicaoEnsinoService] as SInst
+      [TransferenciaService\n(critérios e aprovação)] as STransf
       [MoedaService] <<Lab03S03>> as SMoeda
       [NotificacaoService] <<Lab03S03>> as SNotif
     }
@@ -61,12 +67,14 @@ node "Aplicação Spring Boot (Java 17)" {
       [Usuario, Aluno, Professor,\nEmpresaParceira, Vantagem,\nTransacao, ...] as Dominio
     }
     package "Persistência — Spring Data JPA\n(repository/)" {
-      [AlunoRepository\nEmpresaParceiraRepository\nProfessorRepository\nTransacaoRepository\n...] as Repos
+      [AlunoRepository\nEmpresaParceiraRepository\nProfessorRepository\nTransacaoRepository\nTransferenciaMoedasRepository\n...] as Repos
       [Hibernate (ORM)] as ORM
     }
   }
 
   [DadosIniciais\n(carga inicial)] as Carga
+  [TarefasAgendadas\n(expiração, a cada hora)] as Agenda
+  [RegrasTransferencia\n(application.properties)] as Regras
 }
 
 database "H2\n(./dados/moeda-estudantil)" as BD
@@ -96,6 +104,14 @@ SProf --> Repos
 SInst --> Repos
 Carga --> Repos
 Carga --> SProf
+
+HTML --> CTransf
+CTransf ..> VTransf : renderiza
+CTransf --> STransf
+CAluno --> STransf
+STransf --> Repos
+STransf --> Regras
+Agenda --> STransf
 
 Repos ..> Dominio : persiste
 Repos --> ORM

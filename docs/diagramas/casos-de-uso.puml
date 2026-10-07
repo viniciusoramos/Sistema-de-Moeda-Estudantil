@@ -1,10 +1,13 @@
 @startuml casos-de-uso
 ' =====================================================================
 ' Sistema de Moeda Estudantil - PUC Minas
-' Diagrama de Casos de Uso - v1 (Lab03S01)
+' Diagrama de Casos de Uso - v2.1 (Lab03S02 + novo requisito)
+'
+' Mudanças em relação à v2: novo requisito de transferência de moedas
+' entre alunos com aprovação de professor (UC14 a UC17).
 ' =====================================================================
 
-title Sistema de Moeda Estudantil — Diagrama de Casos de Uso (v1 · Lab03S01)
+title Sistema de Moeda Estudantil — Diagrama de Casos de Uso (v2.1 · Lab03S02)
 
 left to right direction
 skinparam shadowing false
@@ -44,6 +47,11 @@ rectangle "Sistema de Moeda Estudantil" {
   usecase "UC12 — Notificar Aluno\nsobre Moedas Recebidas" as UC12
   usecase "UC13 — Enviar Cupom ao Aluno\ne ao Parceiro" as UC13
   usecase "Selecionar Instituição\nde Ensino" as UCInst
+  usecase "UC14 — Solicitar Transferência\npara Colega" as UC14
+  usecase "UC15 — Avaliar Transferência\n(aprovar / rejeitar)" as UC15
+  usecase "UC16 — Cancelar Transferência" as UC16
+  usecase "UC17 — Expirar Transferências\nPendentes" as UC17
+  usecase "Verificar Critérios\nda Transferência" as UCCrit
 }
 
 Usuario --> UC01
@@ -62,6 +70,18 @@ Empresa --> UC05
 Empresa --> UC06
 
 Tempo --> UC11
+
+Aluno --> UC14
+Aluno --> UC16
+Professor --> UC15
+Tempo --> UC17
+UC14 ..> UCCrit : <<include>>
+UC16 ..> UC14 : <<extend>>
+
+note right of UC15
+  Somente professor da instituição dos alunos.
+  Rejeição exige justificativa (RN18).
+end note
 
 UC02 ..> UCInst : <<include>>
 UC07 ..> UC12 : <<include>>

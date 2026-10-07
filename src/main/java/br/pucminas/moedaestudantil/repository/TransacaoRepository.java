@@ -12,7 +12,7 @@ import br.pucminas.moedaestudantil.model.Professor;
 import br.pucminas.moedaestudantil.model.Transacao;
 
 /**
- * Acesso às transações (envios, resgates e créditos semestrais), base do extrato (RN09).
+ * Acesso às transações (envios, resgates, créditos semestrais e transferências), base do extrato (RN09).
  * As consultas JPQL usam TREAT para filtrar pelas subclasses da hierarquia JOINED.
  */
 public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
@@ -21,6 +21,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
            select t from Transacao t
            where treat(t as EnvioMoedas).aluno = :aluno
               or treat(t as ResgateVantagem).aluno = :aluno
+              or treat(t as TransferenciaMoedas).remetente = :aluno
+              or treat(t as TransferenciaMoedas).destinatario = :aluno
            order by t.dataHora desc
            """)
     List<Transacao> extratoDoAluno(@Param("aluno") Aluno aluno);
@@ -37,6 +39,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
            select count(t) > 0 from Transacao t
            where treat(t as EnvioMoedas).aluno = :aluno
               or treat(t as ResgateVantagem).aluno = :aluno
+              or treat(t as TransferenciaMoedas).remetente = :aluno
+              or treat(t as TransferenciaMoedas).destinatario = :aluno
            """)
     boolean alunoPossuiTransacoes(@Param("aluno") Aluno aluno);
 

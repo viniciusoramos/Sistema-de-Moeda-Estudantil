@@ -102,7 +102,7 @@ public class DadosIniciais implements CommandLineRunner {
                         "Belo Horizonte", "MG", "30140-002"),
                 "Engenharia de Software", puc));
 
-        // Primeiro reconhecimento, para o extrato de demonstração não começar vazio
+        // Primeiro reconhecimento, para o aluno de demonstração ter saldo para transferir
         glender.debitarEnvio(200);
         vinicius.receberMoedas(200);
         transacaoRepository.save(new EnvioMoedas(glender, vinicius, 200,

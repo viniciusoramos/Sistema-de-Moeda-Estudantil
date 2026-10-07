@@ -1,0 +1,39 @@
+@startuml diagrama-estados-transferencia
+' =====================================================================
+' Sistema de Moeda Estudantil - PUC Minas
+' Diagrama de Estados - TransferenciaMoedas - v2.1 (Lab03S02)
+' Corresponde a model/StatusTransferencia e model/TransferenciaMoedas.
+' =====================================================================
+
+title Transferência de Moedas entre Alunos — Diagrama de Estados (v2.1 · Lab03S02)
+
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+}
+
+state "Verificação dos critérios" as Verificacao : RN13 mesma instituição, alunos diferentes\nRN17 motivo ≥ 10 caracteres\nRN14 valor de 1 a 100\nRN17 até 3 pendentes\nRN15 até 300 moedas/mês\nRN14 saldo suficiente
+
+state PENDENTE : valor reservado\n(debitado do remetente)
+state APROVADA : valor creditado\nao destinatário
+state REJEITADA : valor devolvido\nao remetente
+state CANCELADA : valor devolvido\nao remetente
+state EXPIRADA : valor devolvido\nao remetente
+
+[*] --> Verificacao : aluno solicita (UC14)
+Verificacao --> [*] : algum critério falha /\nsolicitação recusada
+Verificacao --> PENDENTE : todos os critérios atendidos
+
+PENDENTE --> APROVADA : professor da instituição aprova (UC15)
+PENDENTE --> REJEITADA : professor da instituição rejeita\n[justificativa ≥ 10 caracteres] (UC15)
+PENDENTE --> CANCELADA : remetente cancela (UC16)
+PENDENTE --> EXPIRADA : 7 dias sem decisão (UC17)
+
+APROVADA --> [*]
+REJEITADA --> [*]
+CANCELADA --> [*]
+EXPIRADA --> [*]
+
+@enduml

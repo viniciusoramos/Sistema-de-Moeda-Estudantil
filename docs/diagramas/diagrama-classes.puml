@@ -11,9 +11,14 @@
 '   - Usuario guarda senhaHash (BCrypt) em vez da senha em texto
 '   - EmpresaParceira ganhou telefone; Vantagem ganhou o indicador "ativa"
 '   - nova classe SaldoInsuficienteException para as regras de saldo
+'
+' v2.1 - novo requisito (transferência entre alunos com aprovação):
+'   - nova classe TransferenciaMoedas (especialização de Transacao)
+'   - nova enumeração StatusTransferencia
+'   - RegrasTransferencia guarda os limites configuráveis
 ' =====================================================================
 
-title Sistema de Moeda Estudantil — Diagrama de Classes do Domínio (v2 · Lab03S02)
+title Sistema de Moeda Estudantil — Diagrama de Classes do Domínio (v2.1 · Lab03S02)
 
 skinparam classAttributeIconSize 0
 skinparam shadowing false
@@ -108,6 +113,41 @@ class CreditoSemestral {
 }
 
 class SaldoInsuficienteException <<exception>>
+
+class TransferenciaMoedas {
+  - motivo : String
+  - status : StatusTransferencia
+  - dataDecisao : LocalDateTime
+  - justificativa : String
+  + aprovar(p : Professor) : void
+  + rejeitar(p : Professor, justificativa : String) : void
+  + cancelar() : void
+  + expirar() : void
+  + isPendente() : boolean
+}
+
+enum StatusTransferencia {
+  PENDENTE
+  APROVADA
+  REJEITADA
+  CANCELADA
+  EXPIRADA
+}
+
+class RegrasTransferencia <<record>> {
+  + valorMaximo : int = 100
+  + limiteMensal : int = 300
+  + maximoPendentes : int = 3
+  + prazoAprovacaoDias : int = 7
+  + tamanhoMinimoMotivo : int = 10
+}
+
+Transacao <|-- TransferenciaMoedas
+TransferenciaMoedas "*" --> "1" Aluno : remetente
+TransferenciaMoedas "*" --> "1" Aluno : destinatário
+TransferenciaMoedas "*" --> "0..1" Professor : avaliador
+TransferenciaMoedas --> StatusTransferencia
+TransferenciaMoedas ..> RegrasTransferencia : <<validada por\nTransferenciaService>>
 
 Usuario <|-- Aluno
 Usuario <|-- Professor

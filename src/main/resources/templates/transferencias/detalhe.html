@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Transferência')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <div class="cabecalho-pagina">
+        <div>
+            <h1>Transferência de <span class="saldo" th:text="${t.valor} + ' moedas'"></span></h1>
+            <p class="subtitulo"><span class="selo" th:classappend="${#strings.toLowerCase(t.status.name())}" th:text="${t.status.rotulo}"></span></p>
+        </div>
+        <a class="botao secundario" th:href="@{/transferencias}">Voltar</a>
+    </div>
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <div class="cartao">
+        <dl class="dados">
+            <dt>De</dt><dd><a th:href="@{/alunos/{id}(id=${t.remetente.id})}" th:text="${t.remetente.nome}"></a></dd>
+            <dt>Para</dt><dd><a th:href="@{/alunos/{id}(id=${t.destinatario.id})}" th:text="${t.destinatario.nome}"></a></dd>
+            <dt>Instituição</dt><dd th:text="${t.remetente.instituicao.nome}"></dd>
+            <dt>Motivo</dt><dd th:text="${t.motivo}"></dd>
+            <dt>Solicitada em</dt><dd th:text="${#temporals.format(t.dataHora, 'dd/MM/yyyy HH:mm')}"></dd>
+            <th:block th:if="${t.pendente}">
+                <dt>Expira em</dt><dd th:text="${#temporals.format(t.dataHora.plusDays(regras.prazoAprovacaoDias), 'dd/MM/yyyy HH:mm')}"></dd>
+            </th:block>
+            <th:block th:unless="${t.pendente}">
+                <dt>Decidida em</dt><dd th:text="${#temporals.format(t.dataDecisao, 'dd/MM/yyyy HH:mm')}"></dd>
+                <dt>Avaliador</dt><dd th:text="${t.avaliador != null} ? ${t.avaliador.nome} : '—'"></dd>
+                <dt th:if="${t.justificativa}">Justificativa</dt><dd th:if="${t.justificativa}" th:text="${t.justificativa}"></dd>
+            </th:block>
+        </dl>
+    </div>
+
+    <th:block th:if="${t.pendente}">
+        <h2>Avaliação do professor</h2>
+        <div class="cartao">
+            <p class="dica">Somente professores da instituição dos alunos podem decidir.
+                O login entra na próxima sprint; até lá, escolha o professor responsável.</p>
+            <div class="campos">
+                <form method="post" th:action="@{/transferencias/{id}/aprovar(id=${t.id})}" class="formulario">
+                    <div class="campo">
+                        <label for="profAprovar">Professor</label>
+                        <select id="profAprovar" name="professorId">
+                            <option value="">Selecione…</option>
+                            <option th:each="p : ${avaliadores}" th:value="${p.id}" th:text="${p.nome} + ' — ' + ${p.departamento}"></option>
+                        </select>
+                    </div>
+                    <div class="acoes"><button class="botao" type="submit">Aprovar</button></div>
+                </form>
+                <form method="post" th:action="@{/transferencias/{id}/rejeitar(id=${t.id})}" class="formulario">
+                    <div class="campo">
+                        <label for="profRejeitar">Professor</label>
+                        <select id="profRejeitar" name="professorId">
+                            <option value="">Selecione…</option>
+                            <option th:each="p : ${avaliadores}" th:value="${p.id}" th:text="${p.nome} + ' — ' + ${p.departamento}"></option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="justificativa">Justificativa da rejeição</label>
+                        <input id="justificativa" name="justificativa" maxlength="500">
+                    </div>
+                    <div class="acoes"><button class="botao perigo" type="submit">Rejeitar</button></div>
+                </form>
+            </div>
+        </div>
+
+        <form method="post" th:action="@{/transferencias/{id}/cancelar(id=${t.id})}" class="acoes" style="margin-top:16px"
+              onsubmit="return confirm('Cancelar esta transferência? O valor volta ao remetente.');">
+            <input type="hidden" name="alunoId" th:value="${t.remetente.id}">
+            <button class="botao secundario" type="submit">Remetente: cancelar solicitação</button>
+        </form>
+    </th:block>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -16,6 +16,7 @@ import br.pucminas.moedaestudantil.model.Aluno;
 import br.pucminas.moedaestudantil.service.AlunoService;
 import br.pucminas.moedaestudantil.service.InstituicaoEnsinoService;
 import br.pucminas.moedaestudantil.service.RegraNegocioException;
+import br.pucminas.moedaestudantil.service.TransferenciaService;
 
 /** CRUD de aluno: cadastro (UC02) e manutenção do cadastro (UC03). */
 @Controller
@@ -24,10 +25,13 @@ public class AlunoController {
 
     private final AlunoService alunoService;
     private final InstituicaoEnsinoService instituicaoService;
+    private final TransferenciaService transferenciaService;
 
-    public AlunoController(AlunoService alunoService, InstituicaoEnsinoService instituicaoService) {
+    public AlunoController(AlunoService alunoService, InstituicaoEnsinoService instituicaoService,
+                           TransferenciaService transferenciaService) {
         this.alunoService = alunoService;
         this.instituicaoService = instituicaoService;
+        this.transferenciaService = transferenciaService;
     }
 
     @GetMapping
@@ -59,7 +63,9 @@ public class AlunoController {
 
     @GetMapping("/{id}")
     public String detalhar(@PathVariable Long id, Model model) {
-        model.addAttribute("aluno", alunoService.buscar(id));
+        Aluno aluno = alunoService.buscar(id);
+        model.addAttribute("aluno", aluno);
+        model.addAttribute("transferencias", transferenciaService.doAluno(aluno));
         return "alunos/detalhe";
     }
 

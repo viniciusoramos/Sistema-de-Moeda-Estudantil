@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nova transferência')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <h1>Nova transferência</h1>
+    <p class="subtitulo">Transfira moedas para um colega. A transferência só é concluída depois que um professor aprovar.</p>
+
+    <div class="duas-colunas">
+        <div>
+            <!-- Escolher o remetente recarrega a tela com o saldo dele e os colegas da mesma instituição -->
+            <form method="get" th:action="@{/transferencias/nova}" class="formulario">
+                <fieldset>
+                    <legend>Remetente</legend>
+                    <div class="campos">
+                        <div class="campo largo">
+                            <label for="remetenteSel">Aluno que vai transferir</label>
+                            <select id="remetenteSel" name="remetenteId" onchange="this.form.submit()">
+                                <option value="">Selecione…</option>
+                                <option th:each="a : ${alunos}" th:value="${a.id}"
+                                        th:selected="${form.remetenteId == a.id}"
+                                        th:text="${a.nome} + ' (' + ${a.instituicao.sigla} + ')'"></option>
+                            </select>
+                            <noscript><button class="botao secundario" type="submit">Escolher</button></noscript>
+                        </div>
+                    </div>
+                    <p class="dica" th:if="${remetente}">
+                        Saldo: <span class="saldo" th:text="${remetente.saldoMoedas} + ' moedas'"></span> ·
+                        Ainda pode transferir neste mês: <strong th:text="${disponivelNoMes} + ' moedas'"></strong>
+                    </p>
+                </fieldset>
+            </form>
+
+            <form class="formulario" method="post" novalidate th:action="@{/transferencias}" th:object="${form}"
+                  th:if="${remetente}">
+                <input type="hidden" th:field="*{remetenteId}">
+
+                <div class="alerta erro" th:if="${#fields.hasGlobalErrors()}">
+                    <div th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+                </div>
+                <div class="alerta erro" th:if="${#fields.hasErrors('remetenteId')}" th:errors="*{remetenteId}"></div>
+
+                <fieldset>
+                    <legend>Transferência</legend>
+                    <div class="campos">
+                        <div class="campo largo" th:classappend="${#fields.hasErrors('destinatarioId')} ? 'com-erro'">
+                            <label for="destinatarioId">Destinatário</label>
+                            <select id="destinatarioId" th:field="*{destinatarioId}">
+                                <option value="">Selecione…</option>
+                                <option th:each="a : ${destinatarios}" th:value="${a.id}"
+                                        th:text="${a.nome} + ' — ' + ${a.curso}"></option>
+                            </select>
+                            <span class="dica" th:if="${#lists.isEmpty(destinatarios)}">Não há outros alunos nesta instituição.</span>
+                            <span class="msg-erro" th:errors="*{destinatarioId}"></span>
+                        </div>
+                        <div class="campo" th:classappend="${#fields.hasErrors('valor')} ? 'com-erro'">
+                            <label for="valor">Valor (moedas)</label>
+                            <input id="valor" type="number" min="1" th:max="${regras.valorMaximo}" th:field="*{valor}">
+                            <span class="msg-erro" th:errors="*{valor}"></span>
+                        </div>
+                        <div class="campo largo" th:classappend="${#fields.hasErrors('motivo')} ? 'com-erro'">
+                            <label for="motivo">Motivo</label>
+                            <input id="motivo" th:field="*{motivo}" maxlength="500"
+                                   placeholder="Ex.: ajuda no trabalho em grupo de Banco de Dados">
+                            <span class="msg-erro" th:errors="*{motivo}"></span>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="acoes">
+                    <button class="botao" type="submit">Solicitar transferência</button>
+                    <a class="botao secundario" th:href="@{/transferencias}">Cancelar</a>
+                </div>
+            </form>
+        </div>
+
+        <div th:replace="~{transferencias/criterios :: criterios(${regras})}"></div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

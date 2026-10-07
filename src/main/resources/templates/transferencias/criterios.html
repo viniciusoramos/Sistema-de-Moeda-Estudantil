@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="criterios(regras)" class="cartao criterios">
+    <h2>Critérios para transferir</h2>
+    <ul>
+        <li>Remetente e destinatário são alunos <strong>diferentes</strong> da <strong>mesma instituição</strong>.</li>
+        <li>Valor de <strong>1 a <span th:text="${regras.valorMaximo}">100</span> moedas</strong> por transferência, sem passar do saldo.</li>
+        <li>No máximo <strong th:text="${regras.limiteMensal} + ' moedas'">300 moedas</strong> transferidas por mês (pendentes + aprovadas).</li>
+        <li>Até <strong th:text="${regras.maximoPendentes}">3</strong> solicitações aguardando aprovação ao mesmo tempo.</li>
+        <li>Motivo obrigatório, com pelo menos <span th:text="${regras.tamanhoMinimoMotivo}">10</span> caracteres.</li>
+        <li>O valor fica <strong>reservado</strong> até a decisão de um <strong>professor da instituição</strong>.</li>
+        <li>Rejeição exige justificativa. Se ninguém decidir em <strong th:text="${regras.prazoAprovacaoDias} + ' dias'">7 dias</strong>, o pedido expira.</li>
+        <li>Rejeitada, cancelada ou expirada: o valor <strong>volta ao remetente</strong>.</li>
+    </ul>
+</aside>
+</body>
+</html>

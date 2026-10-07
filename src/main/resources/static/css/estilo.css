@@ -100,7 +100,23 @@ dl.dados dd { margin: 0; }
 .vantagem h3 { font-size: 1rem; margin: 0 0 4px; }
 .vantagem p { margin: 0 0 8px; color: var(--texto-suave); font-size: .9rem; }
 
+.duas-colunas { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.criterios { margin-top: 24px; }
+.duas-colunas .criterios { margin-top: 0; }
+.criterios h2 { margin-top: 0; }
+.criterios ul { margin: 0; padding-left: 18px; }
+.criterios li { margin-bottom: 6px; font-size: .92rem; }
+
+.selo { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; background: #e5e7eb; color: #374151; }
+.selo.pendente { background: #fef3c7; color: #92400e; }
+.selo.aprovada { background: var(--sucesso-fundo); color: var(--sucesso-texto); }
+.selo.rejeitada { background: var(--erro-fundo); color: var(--erro-texto); }
+
 .rodape { color: var(--texto-suave); font-size: .85rem; padding: 24px 0; border-top: 1px solid var(--borda); }
+
+@media (max-width: 800px) {
+    .duas-colunas { grid-template-columns: 1fr; }
+}
 
 @media (max-width: 560px) {
     .topo nav a { margin: 0 16px 0 0; }

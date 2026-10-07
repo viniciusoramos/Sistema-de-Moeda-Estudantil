@@ -10,7 +10,8 @@
             <p class="subtitulo">Saldo: <span class="saldo" th:text="${aluno.saldoMoedas} + ' moedas'"></span></p>
         </div>
         <div class="acoes">
-            <a class="botao" th:href="@{/alunos/{id}/editar(id=${aluno.id})}">Editar</a>
+            <a class="botao" th:href="@{/transferencias/nova(remetenteId=${aluno.id})}">Transferir moedas</a>
+            <a class="botao secundario" th:href="@{/alunos/{id}/editar(id=${aluno.id})}">Editar</a>
             <form method="post" th:action="@{/alunos/{id}/excluir(id=${aluno.id})}"
                   onsubmit="return confirm('Excluir este aluno?');">
                 <button class="botao perigo" type="submit">Excluir</button>
@@ -29,6 +30,24 @@
             <dt>Instituição</dt><dd th:text="${aluno.instituicao.nome} + ' (' + ${aluno.instituicao.sigla} + ')'"></dd>
             <dt>Curso</dt><dd th:text="${aluno.curso}"></dd>
         </dl>
+    </div>
+
+    <h2>Transferências</h2>
+    <div class="tabela-rolagem">
+        <table>
+            <thead><tr><th>Data</th><th>Tipo</th><th>Colega</th><th>Valor</th><th>Situação</th><th></th></tr></thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(transferencias)}"><td colspan="6" class="vazio">Nenhuma transferência.</td></tr>
+            <tr th:each="t : ${transferencias}" th:with="enviada=${t.remetente.id == aluno.id}">
+                <td th:text="${#temporals.format(t.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${enviada} ? 'Enviada' : 'Recebida'"></td>
+                <td th:text="${enviada} ? ${t.destinatario.nome} : ${t.remetente.nome}"></td>
+                <td class="saldo" th:text="(${enviada} ? '−' : '+') + ${t.valor}"></td>
+                <td><span class="selo" th:classappend="${#strings.toLowerCase(t.status.name())}" th:text="${t.status.rotulo}"></span></td>
+                <td><a th:href="@{/transferencias/{id}(id=${t.id})}">Detalhes</a></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </main>
 <footer th:replace="~{fragments/layout :: rodape}"></footer>

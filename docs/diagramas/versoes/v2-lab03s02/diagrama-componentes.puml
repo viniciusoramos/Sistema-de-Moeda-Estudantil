@@ -1,0 +1,104 @@
+@startuml diagrama-componentes
+' =====================================================================
+' Sistema de Moeda Estudantil - PUC Minas
+' Diagrama de Componentes - v2 (Lab03S02)
+'
+' Mudanças em relação à v1 (Lab03S01):
+'   - tecnologias definidas: Spring Boot (Web MVC), Thymeleaf, Spring Data JPA
+'     (Hibernate como ORM) e banco H2
+'   - a camada de persistência passa a ser composta por repositórios Spring Data
+'     (padrão Repository/DAO), um por agregado
+'   - componentes implementados nesta sprint destacados; os demais ficam
+'     para a Lab03S03
+' =====================================================================
+
+title Sistema de Moeda Estudantil — Diagrama de Componentes (v2 · Lab03S02)
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam component {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+  BackgroundColor<<Lab03S03>> #EEEEEE
+  BorderColor<<Lab03S03>> #999999
+  FontColor<<Lab03S03>> #777777
+}
+
+actor "Aluno / Professor /\nEmpresa Parceira" as Usuario
+
+node "Navegador" {
+  [Páginas HTML + CSS] as HTML
+}
+
+node "Aplicação Spring Boot (Java 17)" {
+
+  package "View — Thymeleaf\n(templates/)" {
+    [alunos/*.html] as VAluno
+    [empresas/*.html] as VEmpresa
+    [index.html] as VIndex
+  }
+
+  package "Controller — Spring Web MVC\n(controller/)" {
+    [HomeController] as CHome
+    [AlunoController] as CAluno
+    [EmpresaParceiraController] as CEmpresa
+    [AutenticacaoController] <<Lab03S03>> as CAuth
+    [VantagemController] <<Lab03S03>> as CVant
+    [MoedaController] <<Lab03S03>> as CMoeda
+  }
+
+  package "Model" {
+    package "Serviços (service/)" {
+      [AlunoService] as SAluno
+      [EmpresaParceiraService] as SEmpresa
+      [ProfessorService] as SProf
+      [InstituicaoEnsinoService] as SInst
+      [MoedaService] <<Lab03S03>> as SMoeda
+      [NotificacaoService] <<Lab03S03>> as SNotif
+    }
+    package "Entidades JPA (model/)" {
+      [Usuario, Aluno, Professor,\nEmpresaParceira, Vantagem,\nTransacao, ...] as Dominio
+    }
+    package "Persistência — Spring Data JPA\n(repository/)" {
+      [AlunoRepository\nEmpresaParceiraRepository\nProfessorRepository\nTransacaoRepository\n...] as Repos
+      [Hibernate (ORM)] as ORM
+    }
+  }
+
+  [DadosIniciais\n(carga inicial)] as Carga
+}
+
+database "H2\n(./dados/moeda-estudantil)" as BD
+cloud "Servidor SMTP" <<Lab03S03>> as SMTP
+
+Usuario --> HTML
+HTML --> CHome : HTTP GET/POST
+HTML --> CAluno
+HTML --> CEmpresa
+
+CHome ..> VIndex : renderiza
+CAluno ..> VAluno : renderiza
+CEmpresa ..> VEmpresa : renderiza
+
+CHome --> SAluno
+CHome --> SEmpresa
+CAluno --> SAluno
+CAluno --> SInst
+CEmpresa --> SEmpresa
+CMoeda --> SMoeda
+SMoeda --> SNotif
+SNotif --> SMTP
+
+SAluno --> Repos
+SEmpresa --> Repos
+SProf --> Repos
+SInst --> Repos
+Carga --> Repos
+Carga --> SProf
+
+Repos ..> Dominio : persiste
+Repos --> ORM
+ORM --> BD : JDBC
+
+@enduml
