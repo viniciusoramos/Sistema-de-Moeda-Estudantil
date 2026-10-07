@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Erro')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <h1 th:text="${status == 404} ? 'Página não encontrada' : 'Algo deu errado'">Erro</h1>
+    <p class="subtitulo" th:text="${status == 404} ? 'O registro procurado não existe ou foi excluído.' : 'Tente novamente em instantes.'"></p>
+    <a class="botao" th:href="@{/}">Voltar ao início</a>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

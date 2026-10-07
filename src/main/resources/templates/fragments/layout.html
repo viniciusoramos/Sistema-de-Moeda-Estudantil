@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' · Moeda Estudantil'">Moeda Estudantil</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<header th:fragment="cabecalho" class="topo">
+    <div class="container topo-conteudo">
+        <a class="marca" th:href="@{/}"><span class="moeda">¢</span> Moeda Estudantil</a>
+        <nav>
+            <a th:href="@{/alunos}">Alunos</a>
+            <a th:href="@{/empresas}">Empresas parceiras</a>
+        </nav>
+    </div>
+</header>
+
+<div th:fragment="mensagens">
+    <div class="alerta sucesso" th:if="${sucesso}" th:text="${sucesso}"></div>
+    <div class="alerta erro" th:if="${erro}" th:text="${erro}"></div>
+</div>
+
+<footer th:fragment="rodape" class="rodape">
+    <div class="container">PUC Minas · Laboratório de Desenvolvimento de Software · Lab03 — Sistema de Moeda Estudantil</div>
+</footer>
+
+</body>
+</html>

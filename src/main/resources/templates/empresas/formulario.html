@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${form.novo} ? 'Cadastro de empresa parceira' : 'Editar empresa parceira')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <h1 th:text="${form.novo} ? 'Cadastro de empresa parceira' : 'Editar empresa parceira'">Cadastro de empresa parceira</h1>
+    <p class="subtitulo" th:if="${form.novo}">Cadastre sua empresa para oferecer vantagens aos alunos.</p>
+    <p class="subtitulo" th:unless="${form.novo}" th:text="${form.nome}"></p>
+
+    <form class="formulario" method="post" novalidate
+          th:action="${form.novo} ? @{/empresas} : @{/empresas/{id}(id=${form.id})}" th:object="${form}">
+
+        <div class="alerta erro" th:if="${#fields.hasGlobalErrors()}">
+            <div th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+        </div>
+
+        <fieldset>
+            <legend>Dados da empresa</legend>
+            <div class="campos">
+                <div class="campo largo" th:classappend="${#fields.hasErrors('nome')} ? 'com-erro'">
+                    <label for="nome">Nome</label>
+                    <input id="nome" th:field="*{nome}" maxlength="120">
+                    <span class="msg-erro" th:errors="*{nome}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('cnpj')} ? 'com-erro'">
+                    <label for="cnpj">CNPJ</label>
+                    <input id="cnpj" th:field="*{cnpj}" placeholder="00.000.000/0000-00" maxlength="18">
+                    <span class="msg-erro" th:errors="*{cnpj}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('telefone')} ? 'com-erro'">
+                    <label for="telefone">Telefone</label>
+                    <input id="telefone" th:field="*{telefone}" placeholder="(31) 3333-4444" maxlength="20">
+                    <span class="msg-erro" th:errors="*{telefone}"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Acesso</legend>
+            <div class="campos">
+                <div class="campo" th:classappend="${#fields.hasErrors('email')} ? 'com-erro'">
+                    <label for="email">E-mail (login)</label>
+                    <input id="email" type="email" th:field="*{email}" maxlength="120">
+                    <span class="msg-erro" th:errors="*{email}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('senha')} ? 'com-erro'">
+                    <label for="senha">Senha</label>
+                    <input id="senha" type="password" name="senha" autocomplete="new-password">
+                    <span class="dica" th:unless="${form.novo}">Deixe em branco para manter a senha atual.</span>
+                    <span class="msg-erro" th:errors="*{senha}"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="acoes">
+            <button class="botao" type="submit" th:text="${form.novo} ? 'Cadastrar' : 'Salvar alterações'">Salvar</button>
+            <a class="botao secundario" th:href="${form.novo} ? @{/empresas} : @{/empresas/{id}(id=${form.id})}">Cancelar</a>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

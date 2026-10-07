@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Início')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <h1>Sistema de Moeda Estudantil</h1>
+    <p class="subtitulo">Professores reconhecem o mérito dos alunos com moedas, que os alunos trocam por vantagens em empresas parceiras.</p>
+
+    <div class="grade">
+        <div class="cartao">
+            <div class="numero" th:text="${totalAlunos}">0</div>
+            <div class="rotulo">alunos cadastrados</div>
+            <p class="acoes">
+                <a class="botao" th:href="@{/alunos/novo}">Cadastrar aluno</a>
+                <a class="botao secundario" th:href="@{/alunos}">Ver todos</a>
+            </p>
+        </div>
+        <div class="cartao">
+            <div class="numero" th:text="${totalEmpresas}">0</div>
+            <div class="rotulo">empresas parceiras</div>
+            <p class="acoes">
+                <a class="botao" th:href="@{/empresas/novo}">Cadastrar empresa</a>
+                <a class="botao secundario" th:href="@{/empresas}">Ver todas</a>
+            </p>
+        </div>
+    </div>
+
+    <h2>Professores pré-cadastrados</h2>
+    <div class="tabela-rolagem">
+        <table>
+            <thead><tr><th>Nome</th><th>Departamento</th><th>Instituição</th><th>Saldo</th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${professores}">
+                <td th:text="${p.nome}"></td>
+                <td th:text="${p.departamento}"></td>
+                <td th:text="${p.instituicao.sigla}"></td>
+                <td class="saldo" th:text="${p.saldoMoedas} + ' moedas'"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Instituições participantes</h2>
+    <div class="tabela-rolagem">
+        <table>
+            <thead><tr><th>Sigla</th><th>Nome</th></tr></thead>
+            <tbody>
+            <tr th:each="i : ${instituicoes}">
+                <td th:text="${i.sigla}"></td>
+                <td th:text="${i.nome}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

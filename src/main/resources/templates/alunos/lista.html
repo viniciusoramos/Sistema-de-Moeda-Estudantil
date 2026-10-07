@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Alunos')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <div class="cabecalho-pagina">
+        <div>
+            <h1>Alunos</h1>
+            <p class="subtitulo">Alunos cadastrados no sistema de mérito.</p>
+        </div>
+        <a class="botao" th:href="@{/alunos/novo}">Cadastrar aluno</a>
+    </div>
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <div class="tabela-rolagem">
+        <table>
+            <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Instituição</th><th>Curso</th><th>Saldo</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(alunos)}"><td colspan="6" class="vazio">Nenhum aluno cadastrado.</td></tr>
+            <tr th:each="a : ${alunos}">
+                <td><a th:href="@{/alunos/{id}(id=${a.id})}" th:text="${a.nome}"></a></td>
+                <td th:text="${a.email}"></td>
+                <td th:text="${a.instituicao.sigla}"></td>
+                <td th:text="${a.curso}"></td>
+                <td class="saldo" th:text="${a.saldoMoedas}"></td>
+                <td><a th:href="@{/alunos/{id}/editar(id=${a.id})}">Editar</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

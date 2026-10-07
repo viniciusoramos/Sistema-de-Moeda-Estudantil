@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Empresas parceiras')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <div class="cabecalho-pagina">
+        <div>
+            <h1>Empresas parceiras</h1>
+            <p class="subtitulo">Empresas que oferecem vantagens em troca de moedas.</p>
+        </div>
+        <a class="botao" th:href="@{/empresas/novo}">Cadastrar empresa</a>
+    </div>
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <div class="tabela-rolagem">
+        <table>
+            <thead><tr><th>Nome</th><th>CNPJ</th><th>E-mail</th><th>Telefone</th><th></th></tr></thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(empresas)}"><td colspan="5" class="vazio">Nenhuma empresa cadastrada.</td></tr>
+            <tr th:each="e : ${empresas}">
+                <td><a th:href="@{/empresas/{id}(id=${e.id})}" th:text="${e.nome}"></a></td>
+                <td th:text="${e.cnpj}"></td>
+                <td th:text="${e.email}"></td>
+                <td th:text="${e.telefone} ?: '—'"></td>
+                <td><a th:href="@{/empresas/{id}/editar(id=${e.id})}">Editar</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

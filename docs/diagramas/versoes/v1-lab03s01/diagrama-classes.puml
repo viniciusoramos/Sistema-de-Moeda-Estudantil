@@ -1,0 +1,112 @@
+@startuml diagrama-classes
+' =====================================================================
+' Sistema de Moeda Estudantil - PUC Minas
+' Diagrama de Classes do domínio - v1 (Lab03S01)
+' Modelo de projeto, antes da definição da estratégia de persistência.
+' =====================================================================
+
+title Sistema de Moeda Estudantil — Diagrama de Classes do Domínio (v1 · Lab03S01)
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+}
+hide empty members
+set separator none
+
+abstract class Usuario {
+  - nome : String
+  - email : String
+  - senha : String
+  + autenticar(email : String, senha : String) : boolean
+}
+
+class Aluno {
+  - cpf : String
+  - rg : String
+  - curso : String
+  - saldoMoedas : int
+  + receberMoedas(valor : int) : void
+  + debitarMoedas(valor : int) : void
+  + consultarExtrato() : List<Transacao>
+}
+
+class Professor {
+  + {static} CREDITO_SEMESTRAL : int = 1000
+  - cpf : String
+  - departamento : String
+  - saldoMoedas : int
+  + receberCreditoSemestral() : void
+  + enviarMoedas(aluno : Aluno, valor : int, motivo : String) : EnvioMoedas
+  + consultarExtrato() : List<Transacao>
+}
+
+class EmpresaParceira {
+  - cnpj : String
+  + cadastrarVantagem(v : Vantagem) : void
+}
+
+class Endereco {
+  - logradouro : String
+  - numero : String
+  - complemento : String
+  - bairro : String
+  - cidade : String
+  - uf : String
+  - cep : String
+}
+
+class InstituicaoEnsino {
+  - nome : String
+  - sigla : String
+}
+
+class Vantagem {
+  - titulo : String
+  - descricao : String
+  - fotoUrl : String
+  - custoMoedas : int
+}
+
+abstract class Transacao {
+  - dataHora : LocalDateTime
+  - valor : int
+}
+
+class EnvioMoedas {
+  - motivo : String
+}
+
+class ResgateVantagem {
+  - codigoCupom : String
+  + {static} gerarCodigo() : String
+}
+
+class CreditoSemestral {
+  - semestre : String
+}
+
+Usuario <|-- Aluno
+Usuario <|-- Professor
+Usuario <|-- EmpresaParceira
+
+Aluno *-- "1" Endereco
+Aluno "*" --> "1" InstituicaoEnsino : estuda em >
+Professor "*" --> "1" InstituicaoEnsino : faz parte de >
+
+EmpresaParceira "1" *-- "*" Vantagem : oferece >
+
+Transacao <|-- EnvioMoedas
+Transacao <|-- ResgateVantagem
+Transacao <|-- CreditoSemestral
+
+EnvioMoedas "*" --> "1" Professor : remetente
+EnvioMoedas "*" --> "1" Aluno : destinatário
+ResgateVantagem "*" --> "1" Aluno
+ResgateVantagem "*" --> "1" Vantagem
+CreditoSemestral "*" --> "1" Professor
+
+@enduml

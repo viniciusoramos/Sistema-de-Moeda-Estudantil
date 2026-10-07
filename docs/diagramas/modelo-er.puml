@@ -1,0 +1,133 @@
+@startuml modelo-er
+' =====================================================================
+' Sistema de Moeda Estudantil - PUC Minas
+' Modelo Entidade-Relacionamento (lógico) - v2 (Lab03S02)
+'
+' Gerado a partir do mapeamento JPA das entidades (pacote model):
+'   - herança Usuario -> Aluno/Professor/EmpresaParceira: estratégia JOINED
+'     (uma tabela por classe, PK da filha = FK para usuario)
+'   - herança Transacao -> EnvioMoedas/ResgateVantagem/CreditoSemestral: JOINED
+'   - Endereco é @Embeddable: suas colunas ficam na própria tabela aluno
+' =====================================================================
+
+title Sistema de Moeda Estudantil — Modelo Entidade-Relacionamento (v2 · Lab03S02)
+
+skinparam shadowing false
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+}
+hide circle
+hide empty members
+
+entity "usuario" as usuario {
+  * id : BIGINT <<PK>>
+  --
+  * nome : VARCHAR(120)
+  * email : VARCHAR(120) <<UK>>
+  * senha_hash : VARCHAR(100)
+}
+
+entity "instituicao_ensino" as instituicao {
+  * id : BIGINT <<PK>>
+  --
+  * nome : VARCHAR(120) <<UK>>
+  * sigla : VARCHAR(20)
+}
+
+entity "aluno" as aluno {
+  * usuario_id : BIGINT <<PK, FK>>
+  --
+  * cpf : VARCHAR(14) <<UK>>
+  * rg : VARCHAR(20)
+  * curso : VARCHAR(80)
+  * saldo_moedas : INT
+  * instituicao_id : BIGINT <<FK>>
+  logradouro : VARCHAR(120)
+  numero : VARCHAR(10)
+  complemento : VARCHAR(60)
+  bairro : VARCHAR(60)
+  cidade : VARCHAR(60)
+  uf : CHAR(2)
+  cep : VARCHAR(9)
+}
+
+entity "professor" as professor {
+  * usuario_id : BIGINT <<PK, FK>>
+  --
+  * cpf : VARCHAR(14) <<UK>>
+  * departamento : VARCHAR(80)
+  * saldo_moedas : INT
+  * instituicao_id : BIGINT <<FK>>
+}
+
+entity "empresa_parceira" as empresa {
+  * usuario_id : BIGINT <<PK, FK>>
+  --
+  * cnpj : VARCHAR(18) <<UK>>
+  telefone : VARCHAR(20)
+}
+
+entity "vantagem" as vantagem {
+  * id : BIGINT <<PK>>
+  --
+  * titulo : VARCHAR(100)
+  * descricao : VARCHAR(500)
+  * foto_url : VARCHAR(300)
+  * custo_moedas : INT
+  * ativa : BOOLEAN
+  * empresa_id : BIGINT <<FK>>
+}
+
+entity "transacao" as transacao {
+  * id : BIGINT <<PK>>
+  --
+  * data_hora : TIMESTAMP
+  * valor : INT
+}
+
+entity "envio_moedas" as envio {
+  * transacao_id : BIGINT <<PK, FK>>
+  --
+  * professor_id : BIGINT <<FK>>
+  * aluno_id : BIGINT <<FK>>
+  * motivo : VARCHAR(500)
+}
+
+entity "resgate_vantagem" as resgate {
+  * transacao_id : BIGINT <<PK, FK>>
+  --
+  * aluno_id : BIGINT <<FK>>
+  * vantagem_id : BIGINT <<FK>>
+  * codigo_cupom : VARCHAR(12) <<UK>>
+}
+
+entity "credito_semestral" as credito {
+  * transacao_id : BIGINT <<PK, FK>>
+  --
+  * professor_id : BIGINT <<FK>>
+  * semestre : VARCHAR(6)
+  .. UK (professor_id, semestre) ..
+}
+
+usuario ||--o| aluno
+usuario ||--o| professor
+usuario ||--o| empresa
+
+instituicao ||--o{ aluno : "matricula"
+instituicao ||--o{ professor : "vincula"
+empresa ||--o{ vantagem : "oferece"
+
+transacao ||--o| envio
+transacao ||--o| resgate
+transacao ||--o| credito
+
+professor ||--o{ envio : "envia"
+aluno ||--o{ envio : "recebe"
+aluno ||--o{ resgate : "resgata"
+vantagem ||--o{ resgate : "é resgatada em"
+professor ||--o{ credito : "recebe"
+
+@enduml

@@ -7,13 +7,15 @@ Sistema para estimular o reconhecimento do mérito estudantil com uma moeda virt
 recebem moedas a cada semestre e as distribuem aos alunos como reconhecimento. Os alunos trocam
 as moedas por vantagens (produtos e descontos) oferecidas por empresas parceiras.
 
-> **Versão atual: v1 (Lab03S01).** Modelagem do sistema: requisitos, diagrama de casos de uso,
-> histórias de usuário, diagrama de classes e diagrama de componentes.
+> **Versão atual: v2 (Lab03S02).** Modelo ER, persistência com ORM (JPA/Hibernate + Spring Data)
+> e versão inicial dos CRUDs de aluno e de empresa parceira (front-end Thymeleaf integrado ao back-end
+> Spring MVC). Veja o [histórico de versões](#versões-do-projeto).
 
 ---
 
 ## Sumário
 
+- [Versões do Projeto](#versões-do-projeto)
 - [1. Visão Geral](#1-visão-geral)
 - [2. Atores](#2-atores)
 - [3. Requisitos Funcionais](#3-requisitos-funcionais)
@@ -24,8 +26,22 @@ as moedas por vantagens (produtos e descontos) oferecidas por empresas parceiras
 - [8. Histórias de Usuário](#8-histórias-de-usuário)
 - [9. Diagrama de Classes](#9-diagrama-de-classes)
 - [10. Diagrama de Componentes (Arquitetura MVC)](#10-diagrama-de-componentes-arquitetura-mvc)
-- [11. Cronograma das Sprints](#11-cronograma-das-sprints)
-- [12. Equipe](#12-equipe)
+- [11. Modelo Entidade-Relacionamento](#11-modelo-entidade-relacionamento)
+- [12. Estratégia de Acesso ao Banco de Dados](#12-estratégia-de-acesso-ao-banco-de-dados)
+- [13. Como Executar e Testar](#13-como-executar-e-testar)
+- [14. Estrutura do Repositório](#14-estrutura-do-repositório)
+- [15. Registro de Alterações por Versão](#15-registro-de-alterações-por-versão)
+- [16. Cronograma das Sprints](#16-cronograma-das-sprints)
+- [17. Equipe](#17-equipe)
+
+---
+
+## Versões do Projeto
+
+| Versão | Sprint | Entrega | Diagramas desta versão |
+|---|---|---|---|
+| **v1** | Lab03S01 | Casos de uso, histórias de usuário, diagrama de classes e diagrama de componentes | [`versoes/v1-lab03s01/`](docs/diagramas/versoes/v1-lab03s01/) |
+| **v2** | Lab03S02 | Modelo ER, persistência (ORM + repositórios), CRUDs de aluno e empresa parceira (versão inicial) | [`docs/diagramas/`](docs/diagramas/) (versão atual) |
 
 ---
 
@@ -61,23 +77,23 @@ as moedas por vantagens (produtos e descontos) oferecidas por empresas parceiras
 
 ## 3. Requisitos Funcionais
 
-| Código | Requisito | Caso de uso | Sprint prevista |
+| Código | Requisito | Caso de uso | Sprint |
 |---|---|---|---|
 | RF01 | O sistema deve autenticar alunos, professores e empresas parceiras por e-mail e senha. | UC01 | S03 |
-| RF02 | O aluno deve poder se cadastrar informando nome, e-mail, senha, CPF, RG, endereço, instituição e curso. | UC02 | S02 |
-| RF03 | O aluno deve escolher a instituição de ensino entre as pré-cadastradas. | UC02 | S02 |
-| RF04 | O aluno deve poder consultar, alterar e excluir o próprio cadastro. | UC03 | S02 |
-| RF05 | A empresa parceira deve poder se cadastrar informando nome, CNPJ, e-mail e senha. | UC04 | S02 |
-| RF06 | A empresa parceira deve poder consultar, alterar e excluir o próprio cadastro. | UC05 | S02 |
-| RF07 | A empresa parceira deve poder cadastrar e alterar vantagens (título, descrição, foto e custo). | UC06 | S03 |
+| RF02 | O aluno deve poder se cadastrar informando nome, e-mail, senha, CPF, RG, endereço, instituição e curso. | UC02 | **S02** |
+| RF03 | O aluno deve escolher a instituição de ensino entre as pré-cadastradas. | UC02 | **S02** |
+| RF04 | O aluno deve poder consultar, alterar e excluir o próprio cadastro. | UC03 | **S02** |
+| RF05 | A empresa parceira deve poder se cadastrar informando nome, CNPJ, e-mail, senha e telefone. | UC04 | **S02** |
+| RF06 | A empresa parceira deve poder consultar, alterar e excluir o próprio cadastro. | UC05 | **S02** |
+| RF07 | A empresa parceira deve poder cadastrar, alterar e desativar vantagens (título, descrição, foto e custo). | UC06 | S03 |
 | RF08 | O professor deve poder enviar moedas a um aluno, informando valor e motivo. | UC07 | S03 |
 | RF09 | O aluno deve ser notificado por e-mail ao receber moedas. | UC12 | S03 |
 | RF10 | Professores e alunos devem poder consultar o extrato (saldo e transações). | UC08 | S03 |
 | RF11 | O aluno deve poder consultar as vantagens disponíveis. | UC09 | S03 |
 | RF12 | O aluno deve poder resgatar uma vantagem, tendo o custo debitado do saldo. | UC10 | S03 |
 | RF13 | No resgate, o sistema deve gerar um código e enviar e-mail de cupom ao aluno e e-mail de conferência à empresa. | UC13 | S03 |
-| RF14 | O sistema deve creditar 1.000 moedas a cada professor no início de cada semestre. | UC11 | S02 |
-| RF15 | Instituições e professores devem estar pré-cadastrados no sistema. | — | S02 |
+| RF14 | O sistema deve creditar 1.000 moedas a cada professor no início de cada semestre. | UC11 | **S02** (carga inicial) |
+| RF15 | Instituições e professores devem estar pré-cadastrados no sistema. | — | **S02** (carga inicial) |
 
 ## 4. Requisitos Não Funcionais
 
@@ -85,10 +101,11 @@ as moedas por vantagens (produtos e descontos) oferecidas por empresas parceiras
 |---|---|
 | RNF01 | O sistema deve seguir a arquitetura **MVC** (Model, View, Controller). |
 | RNF02 | O sistema deve ser uma aplicação web acessível por navegador, com layout que funcione em telas de celular. |
-| RNF03 | Os dados devem ser persistidos em banco de dados relacional. |
-| RNF04 | As senhas devem ser armazenadas apenas como hash, nunca em texto puro. |
-| RNF05 | O sistema deve validar os dados de entrada (CPF, CNPJ, e-mail, campos obrigatórios) e exibir as mensagens de erro junto ao campo. |
-| RNF06 | O repositório deve manter todas as versões dos modelos UML. |
+| RNF03 | Os dados devem ser persistidos em banco de dados relacional, acessado por ORM. |
+| RNF04 | As senhas devem ser armazenadas apenas como hash (BCrypt), nunca em texto puro. |
+| RNF05 | O back-end deve ser desenvolvido em Java 17 com Spring Boot. |
+| RNF06 | O sistema deve validar os dados de entrada (CPF, CNPJ, e-mail, CEP, campos obrigatórios) e exibir as mensagens de erro junto ao campo. |
+| RNF07 | O repositório deve manter todas as versões dos modelos UML. |
 
 ## 5. Regras de Negócio
 
@@ -105,6 +122,7 @@ as moedas por vantagens (produtos e descontos) oferecidas por empresas parceiras
 | RN09 | O extrato do professor mostra os créditos semestrais e os envios; o do aluno, os recebimentos e os resgates. |
 | RN10 | Cada resgate gera um código de cupom único, presente nos e-mails ao aluno e à empresa. |
 | RN11 | Todas as funcionalidades, exceto o autocadastro de aluno e de empresa, exigem autenticação. |
+| RN12 | Não é possível excluir um aluno que já tenha transações, nem uma empresa com vantagens já resgatadas, para preservar os extratos. |
 
 ## 6. Diagrama de Casos de Uso
 
@@ -150,20 +168,22 @@ de ensino e curso, para participar do sistema de mérito.
 **US03 — Manter cadastro de aluno** (UC03)
 Como **aluno**, quero consultar, alterar e excluir meu cadastro, para manter meus dados corretos.
 - Posso alterar todos os dados; deixar a senha em branco mantém a senha atual.
+- Não posso excluir o cadastro se já recebi ou troquei moedas (RN12).
 
 **US04 — Cadastro de empresa parceira** (UC04)
-Como **empresa parceira**, quero me cadastrar informando nome, CNPJ, e-mail e senha, para oferecer
-vantagens aos alunos.
+Como **empresa parceira**, quero me cadastrar informando nome, CNPJ, e-mail, senha e telefone, para
+oferecer vantagens aos alunos.
 - CNPJ e e-mail inválidos ou já cadastrados são recusados.
 
 **US05 — Manter cadastro de empresa parceira** (UC05)
 Como **empresa parceira**, quero consultar, alterar e excluir meu cadastro.
-- Ao excluir, minhas vantagens também são removidas.
+- Ao excluir, minhas vantagens também são removidas, desde que nenhuma tenha sido resgatada (RN12).
 
 **US06 — Manter vantagens** (UC06)
 Como **empresa parceira**, quero cadastrar vantagens com título, descrição, foto e custo em moedas,
 para que os alunos possam trocá-las.
 - Todos os campos são obrigatórios e o custo é maior que zero (RN07).
+- Posso desativar uma vantagem; ela deixa de aparecer para os alunos, mas continua nos extratos.
 
 **US07 — Enviar moedas** (UC07, UC12)
 Como **professor**, quero enviar moedas a um aluno, informando o valor e o motivo, para reconhecer
@@ -181,8 +201,8 @@ Como **aluno**, quero ver meu saldo e a lista das moedas que recebi (com profess
 vantagens que resgatei (com código do cupom).
 
 **US10 — Consultar vantagens** (UC09)
-Como **aluno**, quero ver as vantagens disponíveis, com foto, descrição, empresa e custo, para
-escolher o que trocar.
+Como **aluno**, quero ver as vantagens ativas, com foto, descrição, empresa e custo, para escolher
+o que trocar.
 
 **US11 — Resgatar vantagem** (UC10, UC13)
 Como **aluno**, quero trocar minhas moedas por uma vantagem e receber um cupom por e-mail, para
@@ -203,7 +223,8 @@ do cupom e o nome do aluno, para conferir a troca presencial.
 
 ![Diagrama de Classes](docs/diagramas/diagrama-classes.png)
 
-Fonte PlantUML: [`docs/diagramas/diagrama-classes.puml`](docs/diagramas/diagrama-classes.puml)
+Fonte PlantUML: [`docs/diagramas/diagrama-classes.puml`](docs/diagramas/diagrama-classes.puml).
+Corresponde ao pacote [`model`](src/main/java/br/pucminas/moedaestudantil/model/).
 
 Decisões de modelagem:
 - **`Usuario`** é abstrata e concentra o login (e-mail e senha); `Aluno`, `Professor` e
@@ -211,29 +232,140 @@ Decisões de modelagem:
 - **`Transacao`** é abstrata e representa qualquer movimentação de moedas, que compõe o extrato.
   As três especializações são `EnvioMoedas` (professor → aluno), `ResgateVantagem` (aluno → vantagem)
   e `CreditoSemestral` (sistema → professor).
-- `Endereco` é uma classe própria, composta em `Aluno`.
+- As regras de saldo ficam nas próprias entidades (`Professor.debitarEnvio`, `Aluno.debitarMoedas`),
+  que lançam `SaldoInsuficienteException`.
 
 ## 10. Diagrama de Componentes (Arquitetura MVC)
 
 ![Diagrama de Componentes](docs/diagramas/diagrama-componentes.png)
 
-Fonte PlantUML: [`docs/diagramas/diagrama-componentes.puml`](docs/diagramas/diagrama-componentes.puml)
+Fonte PlantUML: [`docs/diagramas/diagrama-componentes.puml`](docs/diagramas/diagrama-componentes.puml).
+Os componentes em cinza serão implementados na Lab03S03.
 
-- **View:** páginas web acessadas pelo navegador.
-- **Controller:** um controlador por área do sistema (autenticação, aluno, empresa, vantagem, moedas).
-- **Model:** serviços com as regras de negócio, entidades de domínio e camada de persistência.
-- O envio de e-mails fica isolado em `NotificacaoService`.
-- As tecnologias serão definidas na Lab03S02.
+| Camada MVC | Pacote / pasta | Tecnologia | Responsabilidade |
+|---|---|---|---|
+| **View** | `src/main/resources/templates/` | Thymeleaf + HTML/CSS | Páginas renderizadas no servidor |
+| **Controller** | `controller/` | Spring Web MVC | Recebe as requisições HTTP, valida os formulários (`controller/form/`) e escolhe a view |
+| **Model — serviços** | `service/` | Spring (`@Service`, `@Transactional`) | Regras de negócio e controle de transações |
+| **Model — domínio** | `model/` | Entidades JPA | Estado e comportamento do domínio |
+| **Model — persistência** | `repository/` | Spring Data JPA + Hibernate | Acesso ao banco (padrão Repository/DAO) |
 
-## 11. Cronograma das Sprints
+## 11. Modelo Entidade-Relacionamento
+
+![Modelo ER](docs/diagramas/modelo-er.png)
+
+Fonte PlantUML: [`docs/diagramas/modelo-er.puml`](docs/diagramas/modelo-er.puml).
+
+- As duas hierarquias (`usuario` e `transacao`) usam a estratégia **JOINED**: uma tabela por classe,
+  e a chave primária da tabela filha também é chave estrangeira para a tabela mãe. Assim o e-mail
+  fica único entre todos os tipos de usuário (RN06), e o extrato é uma única consulta em `transacao`.
+- `Endereco` é um `@Embeddable`: as colunas ficam na própria tabela `aluno`.
+- `credito_semestral` tem chave única `(professor_id, semestre)`, que garante a RN03 também no banco.
+
+## 12. Estratégia de Acesso ao Banco de Dados
+
+**ORM com JPA/Hibernate + padrão Repository (Spring Data JPA).**
+
+1. **Mapeamento objeto-relacional:** as entidades em `model/` são anotadas com JPA (`@Entity`,
+   `@Inheritance(JOINED)`, `@ManyToOne`, `@Embedded`...). O Hibernate gera e atualiza o esquema
+   (`spring.jpa.hibernate.ddl-auto=update`).
+2. **Repositórios (DAO):** cada agregado tem uma interface em `repository/` que estende
+   `JpaRepository`. O Spring Data gera a implementação em tempo de execução: as operações básicas
+   (`save`, `findById`, `delete`) vêm prontas, consultas simples saem do nome do método
+   (`existsByCpfAndIdNot`) e consultas específicas usam JPQL (`TransacaoRepository.extratoDoAluno`).
+3. **Serviços transacionais:** os serviços (`@Transactional`) são a única camada que usa os
+   repositórios. Os controllers nunca acessam o banco diretamente.
+4. **Banco:** H2 em arquivo (`./dados/moeda-estudantil`), sem instalação. Para usar outro banco
+   (PostgreSQL, MySQL), basta adicionar o driver e trocar `spring.datasource.*` em
+   `application.properties`, sem mudar o código.
+5. **Carga inicial:** [`DadosIniciais`](src/main/java/br/pucminas/moedaestudantil/config/DadosIniciais.java)
+   cria as instituições e os professores pré-cadastrados (RN01, RN02) e faz o crédito do semestre
+   atual (RN03), além de uma empresa e dois alunos de demonstração, um deles já com moedas recebidas
+   de um professor.
+
+## 13. Como Executar e Testar
+
+**Pré-requisito:** JDK 17 ou superior. O Maven vem embutido (Maven Wrapper).
+
+```bash
+# Windows
+mvnw.cmd spring-boot:run
+# Linux / macOS
+./mvnw spring-boot:run
+```
+
+Acesse **http://localhost:8080**.
+
+| Tela | URL |
+|---|---|
+| Início (professores e instituições pré-cadastrados) | `/` |
+| Alunos: listar / cadastrar / detalhar / editar / excluir | `/alunos`, `/alunos/novo`, `/alunos/{id}`, `/alunos/{id}/editar` |
+| Empresas parceiras: listar / cadastrar / detalhar / editar / excluir | `/empresas`, `/empresas/novo`, `/empresas/{id}`, `/empresas/{id}/editar` |
+| Console do banco H2 (JDBC URL `jdbc:h2:file:./dados/moeda-estudantil`, usuário `sa`, sem senha) | `/h2-console` |
+
+Usuários da carga inicial (senha `123456`): `glender@pucminas.br` (professor),
+`vinicius@aluno.pucminas.br` e `larissa@aluno.pucminas.br` (alunos), `contato@cantinace.com.br`
+(empresa). O login será ativado na Lab03S03. Para recriar o banco do zero, apague a pasta `dados/`.
+
+**Testes automatizados** (JUnit 5, banco H2 em memória):
+
+```bash
+mvnw.cmd test
+```
+
+São 15 testes cobrindo o cadastro, a edição e a exclusão de aluno e de empresa, a unicidade de
+e-mail, CPF e CNPJ, o hash da senha, o bloqueio de exclusão com transações, o crédito semestral
+acumulável e não repetido, e o saldo insuficiente.
+
+## 14. Estrutura do Repositório
+
+```
+├── docs/diagramas/                  # diagramas da versão atual (.puml, .png, .svg)
+│   └── versoes/v1-lab03s01/         # diagramas da Sprint 1
+├── src/main/java/br/pucminas/moedaestudantil/
+│   ├── model/                       # entidades JPA (Model)
+│   ├── repository/                  # repositórios Spring Data (persistência)
+│   ├── service/                     # regras de negócio (Model)
+│   ├── controller/                  # controllers Spring MVC (Controller)
+│   │   └── form/                    # objetos de formulário com validação
+│   └── config/                      # BCrypt e carga inicial
+├── src/main/resources/
+│   ├── templates/                   # páginas Thymeleaf (View)
+│   ├── static/css/                  # estilos
+│   └── application.properties
+├── src/test/                        # testes automatizados
+├── pom.xml, mvnw, mvnw.cmd          # build Maven
+└── CHANGELOG.md
+```
+
+## 15. Registro de Alterações por Versão
+
+### v1 — Lab03S01 (modelagem)
+- Requisitos funcionais, não funcionais e regras de negócio levantados a partir do enunciado.
+- Diagrama de casos de uso (UC01–UC13), histórias de usuário (US01–US13) com critérios de aceitação.
+- Diagrama de classes do domínio e diagrama de componentes da arquitetura MVC, ainda sem tecnologias.
+
+### v2 — Lab03S02 (persistência e CRUDs iniciais)
+- **Modelo ER** novo, derivado do mapeamento JPA.
+- **Estratégia de persistência** definida e implementada: JPA/Hibernate + Spring Data JPA + H2.
+- **CRUDs de aluno e de empresa parceira** (front-end Thymeleaf integrado ao back-end), com validação
+  de CPF, CNPJ, e-mail e CEP, unicidade e hash de senha.
+- Carga inicial de instituições e professores, com crédito semestral.
+- **Diagrama de classes atualizado:** `id` nas entidades; `senha` → `senhaHash`; `telefone` em
+  `EmpresaParceira`; `ativa` em `Vantagem`; `SaldoInsuficienteException`; métodos de extrato e envio
+  saíram das entidades e irão para a camada de serviço (`MoedaService`) na S03.
+- **Diagrama de componentes atualizado:** tecnologias concretas e camada de persistência detalhada.
+- Nova regra RN12 (exclusão bloqueada quando há transações), descoberta ao implementar a exclusão.
+
+## 16. Cronograma das Sprints
 
 | Sprint | Entregas | Situação |
 |---|---|---|
 | Lab03S01 | Casos de uso, histórias de usuário, diagrama de classes, diagrama de componentes | Concluída |
-| Lab03S02 | Modelo ER, estratégia de persistência, CRUDs de aluno e empresa (versão inicial) | A fazer |
+| Lab03S02 | Modelo ER, estratégia de persistência, CRUDs de aluno e empresa (versão inicial) | Concluída |
 | Lab03S03 | CRUDs finais, login, vantagens, envio de moedas, extrato, resgate, e-mails, slides de arquitetura e persistência | A fazer |
 
-## 12. Equipe
+## 17. Equipe
 
 | Nome | GitHub |
 |---|---|

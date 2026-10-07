@@ -1,11 +1,19 @@
 @startuml diagrama-classes
 ' =====================================================================
 ' Sistema de Moeda Estudantil - PUC Minas
-' Diagrama de Classes do domínio - v1 (Lab03S01)
-' Modelo de projeto, antes da definição da estratégia de persistência.
+' Diagrama de Classes do domínio - v2 (Lab03S02)
+'
+' Corresponde ao pacote br.pucminas.moedaestudantil.model.
+' Getters/setters triviais foram omitidos para legibilidade.
+'
+' Mudanças em relação à v1 (Lab03S01), após o mapeamento objeto-relacional:
+'   - identificadores (id) explícitos em todas as entidades
+'   - Usuario guarda senhaHash (BCrypt) em vez da senha em texto
+'   - EmpresaParceira ganhou telefone; Vantagem ganhou o indicador "ativa"
+'   - nova classe SaldoInsuficienteException para as regras de saldo
 ' =====================================================================
 
-title Sistema de Moeda Estudantil — Diagrama de Classes do Domínio (v1 · Lab03S01)
+title Sistema de Moeda Estudantil — Diagrama de Classes do Domínio (v2 · Lab03S02)
 
 skinparam classAttributeIconSize 0
 skinparam shadowing false
@@ -18,10 +26,17 @@ hide empty members
 set separator none
 
 abstract class Usuario {
+  - id : Long
   - nome : String
   - email : String
-  - senha : String
-  + autenticar(email : String, senha : String) : boolean
+  - senhaHash : String
+  + {abstract} getTipo() : TipoUsuario
+}
+
+enum TipoUsuario {
+  ALUNO
+  PROFESSOR
+  EMPRESA_PARCEIRA
 }
 
 class Aluno {
@@ -31,7 +46,6 @@ class Aluno {
   - saldoMoedas : int
   + receberMoedas(valor : int) : void
   + debitarMoedas(valor : int) : void
-  + consultarExtrato() : List<Transacao>
 }
 
 class Professor {
@@ -40,16 +54,16 @@ class Professor {
   - departamento : String
   - saldoMoedas : int
   + receberCreditoSemestral() : void
-  + enviarMoedas(aluno : Aluno, valor : int, motivo : String) : EnvioMoedas
-  + consultarExtrato() : List<Transacao>
+  + debitarEnvio(valor : int) : void
 }
 
 class EmpresaParceira {
   - cnpj : String
-  + cadastrarVantagem(v : Vantagem) : void
+  - telefone : String
+  + adicionarVantagem(v : Vantagem) : void
 }
 
-class Endereco {
+class Endereco <<embeddable>> {
   - logradouro : String
   - numero : String
   - complemento : String
@@ -60,20 +74,25 @@ class Endereco {
 }
 
 class InstituicaoEnsino {
+  - id : Long
   - nome : String
   - sigla : String
 }
 
 class Vantagem {
+  - id : Long
   - titulo : String
   - descricao : String
   - fotoUrl : String
   - custoMoedas : int
+  - ativa : boolean
 }
 
 abstract class Transacao {
+  - id : Long
   - dataHora : LocalDateTime
   - valor : int
+  + {abstract} getDescricao() : String
 }
 
 class EnvioMoedas {
@@ -82,16 +101,18 @@ class EnvioMoedas {
 
 class ResgateVantagem {
   - codigoCupom : String
-  + {static} gerarCodigo() : String
 }
 
 class CreditoSemestral {
   - semestre : String
 }
 
+class SaldoInsuficienteException <<exception>>
+
 Usuario <|-- Aluno
 Usuario <|-- Professor
 Usuario <|-- EmpresaParceira
+Usuario ..> TipoUsuario
 
 Aluno *-- "1" Endereco
 Aluno "*" --> "1" InstituicaoEnsino : estuda em >
@@ -108,5 +129,8 @@ EnvioMoedas "*" --> "1" Aluno : destinatário
 ResgateVantagem "*" --> "1" Aluno
 ResgateVantagem "*" --> "1" Vantagem
 CreditoSemestral "*" --> "1" Professor
+
+Aluno ..> SaldoInsuficienteException : <<throws>>
+Professor ..> SaldoInsuficienteException : <<throws>>
 
 @enduml

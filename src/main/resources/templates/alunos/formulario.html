@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${form.novo} ? 'Cadastro de aluno' : 'Editar aluno')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: cabecalho}"></header>
+<main class="container">
+    <h1 th:text="${form.novo} ? 'Cadastro de aluno' : 'Editar aluno'">Cadastro de aluno</h1>
+    <p class="subtitulo" th:if="${form.novo}">Preencha seus dados para ingressar no sistema de mérito.</p>
+    <p class="subtitulo" th:unless="${form.novo}" th:text="${form.nome}"></p>
+
+    <form class="formulario" method="post" novalidate
+          th:action="${form.novo} ? @{/alunos} : @{/alunos/{id}(id=${form.id})}" th:object="${form}">
+
+        <div class="alerta erro" th:if="${#fields.hasGlobalErrors()}">
+            <div th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+        </div>
+
+        <fieldset>
+            <legend>Dados pessoais</legend>
+            <div class="campos">
+                <div class="campo largo" th:classappend="${#fields.hasErrors('nome')} ? 'com-erro'">
+                    <label for="nome">Nome completo</label>
+                    <input id="nome" th:field="*{nome}" maxlength="120">
+                    <span class="msg-erro" th:errors="*{nome}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('cpf')} ? 'com-erro'">
+                    <label for="cpf">CPF</label>
+                    <input id="cpf" th:field="*{cpf}" placeholder="000.000.000-00" maxlength="14">
+                    <span class="msg-erro" th:errors="*{cpf}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('rg')} ? 'com-erro'">
+                    <label for="rg">RG</label>
+                    <input id="rg" th:field="*{rg}" maxlength="20">
+                    <span class="msg-erro" th:errors="*{rg}"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Endereço</legend>
+            <div class="campos">
+                <div class="campo largo" th:classappend="${#fields.hasErrors('logradouro')} ? 'com-erro'">
+                    <label for="logradouro">Logradouro</label>
+                    <input id="logradouro" th:field="*{logradouro}" maxlength="120">
+                    <span class="msg-erro" th:errors="*{logradouro}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('numero')} ? 'com-erro'">
+                    <label for="numero">Número</label>
+                    <input id="numero" th:field="*{numero}" maxlength="10">
+                    <span class="msg-erro" th:errors="*{numero}"></span>
+                </div>
+                <div class="campo">
+                    <label for="complemento">Complemento</label>
+                    <input id="complemento" th:field="*{complemento}" maxlength="60">
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('bairro')} ? 'com-erro'">
+                    <label for="bairro">Bairro</label>
+                    <input id="bairro" th:field="*{bairro}" maxlength="60">
+                    <span class="msg-erro" th:errors="*{bairro}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('cidade')} ? 'com-erro'">
+                    <label for="cidade">Cidade</label>
+                    <input id="cidade" th:field="*{cidade}" maxlength="60">
+                    <span class="msg-erro" th:errors="*{cidade}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('uf')} ? 'com-erro'">
+                    <label for="uf">UF</label>
+                    <input id="uf" th:field="*{uf}" maxlength="2" placeholder="MG">
+                    <span class="msg-erro" th:errors="*{uf}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('cep')} ? 'com-erro'">
+                    <label for="cep">CEP</label>
+                    <input id="cep" th:field="*{cep}" maxlength="9" placeholder="00000-000">
+                    <span class="msg-erro" th:errors="*{cep}"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Vínculo acadêmico</legend>
+            <div class="campos">
+                <div class="campo" th:classappend="${#fields.hasErrors('instituicaoId')} ? 'com-erro'">
+                    <label for="instituicaoId">Instituição de ensino</label>
+                    <select id="instituicaoId" th:field="*{instituicaoId}">
+                        <option value="">Selecione…</option>
+                        <option th:each="i : ${instituicoes}" th:value="${i.id}" th:text="${i.sigla} + ' — ' + ${i.nome}"></option>
+                    </select>
+                    <span class="msg-erro" th:errors="*{instituicaoId}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('curso')} ? 'com-erro'">
+                    <label for="curso">Curso</label>
+                    <input id="curso" th:field="*{curso}" maxlength="80">
+                    <span class="msg-erro" th:errors="*{curso}"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Acesso</legend>
+            <div class="campos">
+                <div class="campo" th:classappend="${#fields.hasErrors('email')} ? 'com-erro'">
+                    <label for="email">E-mail (login)</label>
+                    <input id="email" type="email" th:field="*{email}" maxlength="120">
+                    <span class="msg-erro" th:errors="*{email}"></span>
+                </div>
+                <div class="campo" th:classappend="${#fields.hasErrors('senha')} ? 'com-erro'">
+                    <label for="senha">Senha</label>
+                    <input id="senha" type="password" name="senha" autocomplete="new-password">
+                    <span class="dica" th:unless="${form.novo}">Deixe em branco para manter a senha atual.</span>
+                    <span class="msg-erro" th:errors="*{senha}"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="acoes">
+            <button class="botao" type="submit" th:text="${form.novo} ? 'Cadastrar' : 'Salvar alterações'">Salvar</button>
+            <a class="botao secundario" th:href="${form.novo} ? @{/alunos} : @{/alunos/{id}(id=${form.id})}">Cancelar</a>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
