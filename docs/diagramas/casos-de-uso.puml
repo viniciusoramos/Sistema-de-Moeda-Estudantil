@@ -1,0 +1,84 @@
+@startuml casos-de-uso
+' =====================================================================
+' Sistema de Moeda Estudantil - PUC Minas
+' Diagrama de Casos de Uso - v1 (Lab03S01)
+' =====================================================================
+
+title Sistema de Moeda Estudantil — Diagrama de Casos de Uso (v1 · Lab03S01)
+
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+}
+skinparam actor {
+  BorderColor #444444
+}
+
+actor "Usuário" as Usuario
+actor "Aluno" as Aluno
+actor "Professor" as Professor
+actor "Empresa Parceira" as Empresa
+actor "Serviço de E-mail" as Email <<sistema>>
+actor "Tempo\n(início do semestre)" as Tempo <<sistema>>
+
+Aluno -up-|> Usuario
+Professor -up-|> Usuario
+Empresa -up-|> Usuario
+
+rectangle "Sistema de Moeda Estudantil" {
+  usecase "UC01 — Realizar Login" as UC01
+  usecase "UC02 — Cadastrar-se como Aluno" as UC02
+  usecase "UC03 — Manter Cadastro de Aluno" as UC03
+  usecase "UC04 — Cadastrar-se como\nEmpresa Parceira" as UC04
+  usecase "UC05 — Manter Cadastro de\nEmpresa Parceira" as UC05
+  usecase "UC06 — Manter Vantagens" as UC06
+  usecase "UC07 — Enviar Moedas" as UC07
+  usecase "UC08 — Consultar Extrato" as UC08
+  usecase "UC09 — Consultar Vantagens" as UC09
+  usecase "UC10 — Resgatar Vantagem" as UC10
+  usecase "UC11 — Creditar Moedas Semestrais" as UC11
+  usecase "UC12 — Notificar Aluno\nsobre Moedas Recebidas" as UC12
+  usecase "UC13 — Enviar Cupom ao Aluno\ne ao Parceiro" as UC13
+  usecase "Selecionar Instituição\nde Ensino" as UCInst
+}
+
+Usuario --> UC01
+
+Aluno --> UC02
+Aluno --> UC03
+Aluno --> UC08
+Aluno --> UC09
+Aluno --> UC10
+
+Professor --> UC07
+Professor --> UC08
+
+Empresa --> UC04
+Empresa --> UC05
+Empresa --> UC06
+
+Tempo --> UC11
+
+UC02 ..> UCInst : <<include>>
+UC07 ..> UC12 : <<include>>
+UC10 ..> UC13 : <<include>>
+UC10 ..> UC09 : <<include>>
+
+UC12 --> Email
+UC13 --> Email
+
+note right of UC01
+  Todos os casos de uso, exceto UC02 e UC04
+  (autocadastro), exigem usuário autenticado (RN11).
+end note
+
+note bottom of UC11
+  Instituições e professores são pré-cadastrados
+  pela carga inicial da parceria (RN01, RN02).
+end note
+
+@enduml

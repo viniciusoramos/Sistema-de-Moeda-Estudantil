@@ -1,0 +1,75 @@
+@startuml diagrama-componentes
+' =====================================================================
+' Sistema de Moeda Estudantil - PUC Minas
+' Diagrama de Componentes - v1 (Lab03S01)
+' Arquitetura MVC em camadas, ainda sem tecnologias definidas.
+' =====================================================================
+
+title Sistema de Moeda Estudantil — Diagrama de Componentes (v1 · Lab03S01)
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam component {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+}
+
+actor "Aluno / Professor /\nEmpresa Parceira" as Usuario
+
+package "Sistema de Moeda Estudantil" {
+
+  package "View" {
+    [Páginas Web] as Paginas
+  }
+
+  package "Controller" {
+    [AutenticacaoController] as CAuth
+    [AlunoController] as CAluno
+    [EmpresaController] as CEmpresa
+    [VantagemController] as CVant
+    [MoedaController] as CMoeda
+  }
+
+  package "Model" {
+    package "Serviços (regras de negócio)" {
+      [AutenticacaoService] as SAuth
+      [AlunoService] as SAluno
+      [EmpresaService] as SEmpresa
+      [VantagemService] as SVant
+      [MoedaService\n(envio, resgate, extrato)] as SMoeda
+      [NotificacaoService] as SNotif
+    }
+    [Entidades de domínio] as Dominio
+    [Persistência\n(acesso a dados)] as Persist
+  }
+}
+
+database "Banco de Dados\nRelacional" as BD
+cloud "Servidor de E-mail" as SMTP
+
+Usuario --> Paginas : HTTP
+Paginas --> CAuth
+Paginas --> CAluno
+Paginas --> CEmpresa
+Paginas --> CVant
+Paginas --> CMoeda
+
+CAuth --> SAuth
+CAluno --> SAluno
+CEmpresa --> SEmpresa
+CVant --> SVant
+CMoeda --> SMoeda
+
+SMoeda --> SNotif
+SNotif --> SMTP : SMTP
+
+SAuth --> Persist
+SAluno --> Persist
+SEmpresa --> Persist
+SVant --> Persist
+SMoeda --> Persist
+Persist --> Dominio
+Persist --> BD
+
+@enduml
